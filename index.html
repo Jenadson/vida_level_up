@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vida Level Up</title>
+  <style>
+    :root {
+      --bg1: #0f1020;
+      --bg2: #1a1433;
+      --panel: rgba(255,255,255,0.08);
+      --panel-border: rgba(255,255,255,0.14);
+      --text: #f5f7ff;
+      --muted: #b8b9d1;
+      --green: #69e36f;
+      --blue: #61b6ff;
+      --gold: #ffc84d;
+      --pink: #ff73c3;
+      --red: #ff6b6b;
+      --yellow: #ffd54f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(255, 110, 199, 0.20), transparent 25%),
+        radial-gradient(circle at bottom left, rgba(97, 182, 255, 0.20), transparent 25%),
+        linear-gradient(180deg, var(--bg2), var(--bg1));
+      min-height: 100vh;
+    }
+    .phone {
+      max-width: 440px;
+      margin: 0 auto;
+      padding: 18px 14px 28px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 22px;
+      padding: 16px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.28);
+      margin-bottom: 14px;
+    }
+    .top {
+      display: grid;
+      grid-template-columns: 88px 1fr;
+      gap: 14px;
+      align-items: center;
+    }
+    .avatar {
+      width: 88px; height: 88px; border-radius: 50%;
+      background: linear-gradient(135deg, #ffb35c, #ff73c3 60%, #61b6ff);
+      display: grid; place-items: center;
+      font-size: 38px;
+      border: 3px solid rgba(255,255,255,.25);
+      box-shadow: 0 0 0 6px rgba(255,255,255,.06);
+    }
+    h1 { margin: 0 0 4px; font-size: 28px; }
+    .sub { color: var(--muted); font-size: 13px; }
+    .row { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+    .badge {
+      display:inline-block; padding:6px 10px; border-radius: 999px;
+      background: rgba(255, 200, 77, .14); color: var(--gold); font-weight: 700; font-size: 12px;
+      border: 1px solid rgba(255, 200, 77, .22);
+    }
+    .section-title {
+      font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+      margin-bottom: 10px; font-weight: 700;
+    }
+    .bar-wrap { margin: 8px 0 12px; }
+    .label-line { display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; }
+    .bar {
+      height: 12px; border-radius: 999px; background: rgba(255,255,255,.08); overflow:hidden;
+      border:1px solid rgba(255,255,255,.09);
+    }
+    .fill { height:100%; width:0; border-radius:999px; transition: width .25s ease; }
+    .green { background: linear-gradient(90deg, #77ff93, #43d46c); }
+    .blue { background: linear-gradient(90deg, #89d0ff, #55a8ff); }
+    .gold { background: linear-gradient(90deg, #ffe17d, #ffb82e); }
+    .xp-fill { background: linear-gradient(90deg, #ffd54f, #ff8f00); }
+    .tasks { display: grid; gap: 10px; }
+    .task {
+      display:flex; gap:12px; align-items:center;
+      padding: 12px; border-radius: 16px; background: rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.09);
+    }
+    .task input { width: 22px; height: 22px; accent-color: #79ff8b; }
+    .task .name { font-weight: 700; }
+    .task .meta { color: var(--muted); font-size: 12px; margin-top: 2px; }
+    .task .xp { margin-left:auto; font-weight: 800; color: var(--gold); }
+    .grid {
+      display:grid; grid-template-columns: 1.2fr repeat(5, 40px); gap: 8px; align-items:center;
+      font-size: 13px;
+    }
+    .dayhead { text-align:center; color: var(--muted); font-weight: 700; }
+    .cell {
+      width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
+      background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08);
+      cursor:pointer; user-select:none; font-size: 18px;
+    }
+    .state-red { background: rgba(255,107,107,.18); border-color: rgba(255,107,107,.30); }
+    .state-yellow { background: rgba(255,213,79,.18); border-color: rgba(255,213,79,.35); }
+    .state-green { background: rgba(105,227,111,.18); border-color: rgba(105,227,111,.35); }
+    .legend { display:flex; gap:10px; flex-wrap:wrap; color: var(--muted); font-size: 12px; margin-top: 10px; }
+    .dot { width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:5px; }
+    .goal-list { display:grid; gap:10px; }
+    .goal { display:flex; justify-content:space-between; gap:10px; color:#f1f3ff; }
+    .small { color: var(--muted); font-size:12px; }
+    .footer {
+      text-align:center; color: var(--muted); font-size: 12px; margin-top: 8px;
+    }
+    button.reset {
+      width:100%; border:none; border-radius:16px; padding:14px; font-weight:800; font-size:15px;
+      background: linear-gradient(90deg, #ff73c3, #61b6ff); color:white; cursor:pointer;
+      box-shadow: 0 10px 20px rgba(0,0,0,.18);
+    }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="card">
+      <div class="top">
+        <div class="avatar">🎮</div>
+        <div>
+          <h1>Vida Level Up</h1>
+          <div class="row">
+            <div class="sub">Sua semana gamificada</div>
+            <div class="badge" id="levelBadge">Nível 1</div>
+          </div>
+          <div class="bar-wrap">
+            <div class="label-line"><span>XP semanal</span><strong id="xpText">0 / 100 XP</strong></div>
+            <div class="bar"><div id="xpBar" class="fill xp-fill"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Missões do dia</div>
+      <div class="tasks">
+        <label class="task"><input type="checkbox" data-xp="10" data-type="corpo"><div><div class="name">🚶 Caminhada</div><div class="meta">1h a 1h30 — meta: 3x/semana</div></div><div class="xp">+10 XP</div></label>
+        <label class="task"><input type="checkbox" data-xp="10" data-type="futuro"><div><div class="name">🇬🇧 Inglês</div><div class="meta">Aula ou revisão</div></div><div class="xp">+10 XP</div></label>
+        <label class="task"><input type="checkbox" data-xp="10" data-type="futuro"><div><div class="name">💻 Vibe Code</div><div class="meta">Curso do marido</div></div><div class="xp">+10 XP</div></label>
+        <label class="task"><input type="checkbox" data-xp="10" data-type="dinheiro"><div><div class="name">📱 Conteúdo / Shopee</div><div class="meta">Gravar, editar, postar ou planejar</div></div><div class="xp">+10 XP</div></label>
+        <label class="task"><input type="checkbox" data-xp="5" data-type="dinheiro"><div><div class="name">✨ Estudo digital</div><div class="meta">Aprender algo novo para Instagram/vendas</div></div><div class="xp">+5 XP</div></label>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Áreas da semana</div>
+      <div class="bar-wrap">
+        <div class="label-line"><span>💪 Corpo</span><strong id="corpoText">0 / 30</strong></div>
+        <div class="bar"><div id="corpoBar" class="fill green"></div></div>
+      </div>
+      <div class="bar-wrap">
+        <div class="label-line"><span>🧠 Futuro</span><strong id="futuroText">0 / 30</strong></div>
+        <div class="bar"><div id="futuroBar" class="fill blue"></div></div>
+      </div>
+      <div class="bar-wrap">
+        <div class="label-line"><span>💰 Dinheiro</span><strong id="dinheiroText">0 / 30</strong></div>
+        <div class="bar"><div id="dinheiroBar" class="fill gold"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Mapa da semana</div>
+      <div class="grid" id="weekGrid">
+        <div></div>
+        <div class="dayhead">SEG</div>
+        <div class="dayhead">TER</div>
+        <div class="dayhead">QUA</div>
+        <div class="dayhead">QUI</div>
+        <div class="dayhead">SEX</div>
+
+        <div>Humor do dia</div>
+        <div class="cell" data-day="0">⬜</div>
+        <div class="cell" data-day="1">⬜</div>
+        <div class="cell" data-day="2">⬜</div>
+        <div class="cell" data-day="3">⬜</div>
+        <div class="cell" data-day="4">⬜</div>
+      </div>
+      <div class="legend">
+        <span><span class="dot" style="background:#ff6b6b"></span>0–1 tarefa</span>
+        <span><span class="dot" style="background:#ffd54f"></span>2–3 tarefas</span>
+        <span><span class="dot" style="background:#69e36f"></span>4+ tarefas</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Objetivos da semana</div>
+      <div class="goal-list">
+        <div class="goal"><span>🎯 3 caminhadas</span><strong id="walkGoal">0 / 3</strong></div>
+        <div class="goal"><span>🇬🇧 2 revisões/aulas de inglês</span><strong id="englishGoal">0 / 2</strong></div>
+        <div class="goal"><span>💻 2 sessões de Vibe Code</span><strong id="vibeGoal">0 / 2</strong></div>
+        <div class="goal"><span>📱 3 ações de conteúdo</span><strong id="contentGoal">0 / 3</strong></div>
+      </div>
+      <p class="small">Dica: marque as missões feitas no dia e use o mapa da semana para colorir seu progresso.</p>
+    </div>
+
+    <div class="card">
+      <button class="reset" id="resetBtn">Recomeçar semana</button>
+      <div class="footer">Abre no navegador do telemóvel e vai marcando durante a semana ✨</div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'vida-level-up-v1';
+    const checkboxes = Array.from(document.querySelectorAll('input[type="checkbox"]'));
+    const dayCells = Array.from(document.querySelectorAll('.cell'));
+
+    const state = {
+      checked: [],
+      dayStates: [0,0,0,0,0]
+    };
+
+    function load() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return;
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed.checked)) state.checked = parsed.checked;
+        if (Array.isArray(parsed.dayStates)) state.dayStates = parsed.dayStates;
+      } catch {}
+    }
+
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function applyState() {
+      checkboxes.forEach((cb, i) => cb.checked = !!state.checked[i]);
+      dayCells.forEach((cell, i) => setDayCell(cell, state.dayStates[i] || 0));
+      updateStats();
+    }
+
+    function setDayCell(cell, value) {
+      cell.classList.remove('state-red','state-yellow','state-green');
+      if (value === 0) { cell.textContent = '⬜'; }
+      if (value === 1) { cell.textContent = '🟥'; cell.classList.add('state-red'); }
+      if (value === 2) { cell.textContent = '🟨'; cell.classList.add('state-yellow'); }
+      if (value === 3) { cell.textContent = '🟩'; cell.classList.add('state-green'); }
+    }
+
+    function updateBar(idBar, idText, value, max) {
+      document.getElementById(idBar).style.width = Math.min(100, (value/max)*100) + '%';
+      document.getElementById(idText).textContent = `${value} / ${max}`;
+    }
+
+    function updateStats() {
+      let xp = 0, corpo = 0, futuro = 0, dinheiro = 0;
+      let walks = 0, english = 0, vibe = 0, content = 0;
+
+      checkboxes.forEach(cb => {
+        if (!cb.checked) return;
+        const val = Number(cb.dataset.xp || 0);
+        xp += val;
+        const type = cb.dataset.type;
+        if (type === 'corpo') corpo += 10;
+        if (type === 'futuro') futuro += 10;
+        if (type === 'dinheiro') dinheiro += 10;
+
+        const name = cb.parentElement.innerText;
+        if (name.includes('Caminhada')) walks++;
+        if (name.includes('Inglês')) english++;
+        if (name.includes('Vibe Code')) vibe++;
+        if (name.includes('Conteúdo')) content++;
+      });
+
+      const maxXp = 100;
+      document.getElementById('xpBar').style.width = Math.min(100, (xp/maxXp)*100) + '%';
+      document.getElementById('xpText').textContent = `${xp} / ${maxXp} XP`;
+
+      let level = 'Nível 1';
+      if (xp >= 30) level = 'Nível 2';
+      if (xp >= 60) level = 'Nível 3';
+      if (xp >= 90) level = 'Nível 4';
+      document.getElementById('levelBadge').textContent = level;
+
+      updateBar('corpoBar','corpoText',Math.min(corpo,30),30);
+      updateBar('futuroBar','futuroText',Math.min(futuro,30),30);
+      updateBar('dinheiroBar','dinheiroText',Math.min(dinheiro,30),30);
+
+      document.getElementById('walkGoal').textContent = `${Math.min(walks,3)} / 3`;
+      document.getElementById('englishGoal').textContent = `${Math.min(english,2)} / 2`;
+      document.getElementById('vibeGoal').textContent = `${Math.min(vibe,2)} / 2`;
+      document.getElementById('contentGoal').textContent = `${Math.min(content,3)} / 3`;
+    }
+
+    checkboxes.forEach((cb, i) => {
+      cb.addEventListener('change', () => {
+        state.checked[i] = cb.checked;
+        save();
+        updateStats();
+      });
+    });
+
+    dayCells.forEach((cell, i) => {
+      cell.addEventListener('click', () => {
+        state.dayStates[i] = ((state.dayStates[i] || 0) + 1) % 4;
+        setDayCell(cell, state.dayStates[i]);
+        save();
+      });
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      if (!confirm('Quer apagar o progresso desta semana?')) return;
+      state.checked = [];
+      state.dayStates = [0,0,0,0,0];
+      save();
+      applyState();
+    });
+
+    load();
+    applyState();
+  </script>
+</body>
+</html>
